@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Milionář — Levice, nebo pravice?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#050a24;
+    --bg2:#0a123f;
+    --panel:#0d1750;
+    --panel2:#0a123f;
+    --edge:#232f7c;
+    --gold:#f4c430;
+    --gold-dim:#8a712c;
+    --cyan:#3fc6f0;
+    --text:#eef1ff;
+    --text-dim:#8b98cc;
+    --ok:#4ade80;
+    --bad:#f87171;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    min-height:100vh; min-height:100dvh;
+    background:
+      radial-gradient(ellipse at 50% -10%, #16205c 0%, var(--bg2) 45%, var(--bg1) 100%);
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    overflow-x:hidden;
+    user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+  }
+  .app{
+    position:relative; z-index:1; min-height:100vh; min-height:100dvh;
+    display:flex; flex-direction:column;
+    padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom);
+    padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right);
+  }
+  h1,h2,h3{font-family:'Oswald',sans-serif; letter-spacing:.02em; margin:0;}
+
+  @keyframes fadeSlideUp{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  @keyframes popIn{ from{opacity:0; transform:scale(.92);} to{opacity:1; transform:scale(1);} }
+  @keyframes shake{ 10%,90%{transform:translateX(-1px);} 20%,80%{transform:translateX(2px);} 30%,50%,70%{transform:translateX(-5px);} 40%,60%{transform:translateX(5px);} }
+  @keyframes ringPop{ 0%{box-shadow:0 0 0 0 rgba(74,222,128,0.55);} 100%{box-shadow:0 0 0 14px rgba(74,222,128,0);} }
+  @keyframes ringPopBad{ 0%{box-shadow:0 0 0 0 rgba(248,113,113,0.55);} 100%{box-shadow:0 0 0 14px rgba(248,113,113,0);} }
+  @keyframes spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  @keyframes spinRev{ from{transform:rotate(0deg);} to{transform:rotate(-360deg);} }
+  @keyframes floatUp{ 0%{opacity:0; transform:translateY(0) scale(.6) rotate(0deg);} 12%{opacity:1;} 100%{opacity:0; transform:translateY(-320px) scale(1) rotate(var(--rot,180deg));} }
+  @keyframes dotPulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.35);} }
+  @keyframes glowPulse{ 0%,100%{box-shadow:0 0 0 0 rgba(244,196,48,0);} 50%{box-shadow:0 0 22px 2px rgba(244,196,48,0.3);} }
+  @keyframes currentRungPulse{ 0%,100%{box-shadow:0 0 0 0 rgba(244,196,48,0.45); transform:scale(1.02);} 50%{box-shadow:0 0 16px 4px rgba(244,196,48,0.55); transform:scale(1.045);} }
+
+  /* ---------- INTRO ---------- */
+  #screen-intro{ flex:1; display:flex; align-items:center; justify-content:center; padding:28px 18px; }
+  .intro-wrap{ max-width:480px; width:100%; text-align:center; animation:fadeSlideUp .6s cubic-bezier(.2,.8,.2,1) both; }
+
+  .badge{ position:relative; width:220px; height:220px; margin:0 auto 6px; }
+  .badge svg{ width:100%; height:100%; }
+  .badge .ring-outer{ animation:spin 40s linear infinite; transform-origin:center; }
+  .badge .ring-inner{ animation:spinRev 30s linear infinite; transform-origin:center; }
+
+  .title-main{
+    font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.06em;
+    font-size:clamp(30px,8vw,44px); color:#fff; line-height:1; margin-top:-14px;
+    text-shadow:0 0 26px rgba(63,198,240,0.35);
+  }
+  .title-sub{
+    font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    font-size:clamp(15px,3.4vw,19px); color:var(--gold); margin-top:6px;
+  }
+  .intro-sub{ color:var(--text-dim); font-size:14.5px; margin:16px 0 20px; line-height:1.6; }
+  .intro-rules{
+    text-align:left; background:rgba(255,255,255,0.03); border:1px solid var(--edge);
+    border-radius:14px; padding:16px 18px; margin:20px 0 24px; font-size:13.5px; color:var(--text-dim); line-height:1.7;
+  }
+  .intro-rules b{color:var(--text);}
+  .btn-start{
+    width:100%; padding:16px; border:1px solid var(--cyan); border-radius:100px; cursor:pointer;
+    font-family:'Oswald',sans-serif; font-size:16px; letter-spacing:.14em; text-transform:uppercase;
+    background:linear-gradient(180deg, rgba(63,198,240,0.14), rgba(63,198,240,0.04));
+    color:#fff; font-weight:600; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .15s ease, box-shadow .15s ease;
+    animation:glowPulse 2.6s ease-in-out infinite;
+  }
+  .btn-start:active{transform:scale(0.97);}
+
+  /* ---------- GAME ---------- */
+  #screen-game{ display:none; flex:1; flex-direction:column; padding:14px 14px 0; animation:fadeIn .5s ease both; }
+  .topbar{ display:flex; align-items:center; justify-content:flex-end; max-width:1040px; margin:0 auto; width:100%; padding:6px 4px 12px; }
+  .warn-chip{ font-size:12px; padding:5px 10px; border-radius:100px; border:1px solid var(--edge); color:var(--text-dim); display:flex; align-items:center; gap:6px; }
+  .warn-dot{width:7px; height:7px; border-radius:50%; background:var(--edge); transition:background .2s ease, box-shadow .2s ease;}
+  .warn-dot.active{background:var(--bad); box-shadow:0 0 8px var(--bad); animation:dotPulse 1.4s ease-in-out infinite;}
+
+  .game-layout{
+    max-width:1040px; margin:0 auto; width:100%; flex:1; padding-bottom:30px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  @media (max-width:560px){ .game-layout{gap:10px;} }
+  /* ---------- LADDER SCREEN (shown on its own between questions) ---------- */
+  .screen-ladder{ display:none; flex-direction:column; align-items:center; gap:12px; animation:fadeSlideUp .4s cubic-bezier(.2,.8,.2,1) both; }
+  .screen-ladder.show{ display:flex; }
+  .ladder-caption{
+    font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+    font-size:clamp(14px,3.6vw,18px); color:var(--text-dim); text-align:center;
+  }
+  .ladder-caption.new-tier{ color:var(--gold); animation:fadeSlideUp .4s cubic-bezier(.2,.8,.2,1) both; }
+  .screen-ladder .ladder{ width:100%; max-width:420px; }
+  .rung.justReached{ animation:glowPulse .7s ease-in-out 2; }
+
+  .question-view{ display:none; }
+  .question-view.show{ display:block; }
+
+  .lifelines-row{
+    max-height:300px; margin-top:22px; padding-top:22px; border-top:1px solid var(--edge); margin-bottom:22px;
+    opacity:1; overflow:hidden;
+    transition:max-height .38s cubic-bezier(.2,.8,.2,1), opacity .3s ease, margin-top .38s cubic-bezier(.2,.8,.2,1), margin-bottom .38s cubic-bezier(.2,.8,.2,1), padding-top .38s cubic-bezier(.2,.8,.2,1), border-color .38s ease;
+  }
+  .lifelines-row.hide{ max-height:0; opacity:0; margin-top:0; margin-bottom:0; padding-top:0; border-color:transparent; }
+  .lifelines-row-inner{ display:flex; flex-direction:column; align-items:center; gap:12px; overflow:hidden; min-height:0; }
+  .lifelines-btns{ display:flex; gap:10px; justify-content:center; width:100%; }
+  .lifelines-row .lifeline-btn{ flex-direction:column; align-items:center; gap:6px; width:auto; text-align:center; }
+  @media (max-width:380px){ .lifelines-btns{gap:6px;} }
+  .lifelines-row .lifelines-note{ font-size:11.5px; line-height:1.4; color:var(--text-dim); text-align:center; }
+  @media (max-width:380px){ .lifelines-row .lifelines-note{font-size:10px;} }
+
+  .question-panel{
+    background:linear-gradient(180deg, var(--panel), var(--panel2));
+    border:1px solid var(--edge); border-radius:20px; padding:24px 22px 22px;
+    box-shadow:0 0 0 1px rgba(63,198,240,0.05);
+    min-width:0; box-sizing:border-box; overflow-y:visible;
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  @media (max-width:560px){ .question-panel{padding:18px 16px 16px; border-radius:16px;} }
+  @media (max-width:380px){ .question-panel{padding:14px 12px 12px; border-radius:14px;} }
+
+  .q-amount{ font-family:'Oswald',sans-serif; font-weight:700; font-size:clamp(20px,4.4vw,28px); color:var(--gold); margin-bottom:10px; margin-top:-6px; }
+  .q-text{ font-size:clamp(14px,2.4vw,19px); line-height:1.5; margin-bottom:20px; min-height:0; animation:fadeSlideUp .4s cubic-bezier(.2,.8,.2,1) both; }
+  @media (max-width:380px){ .q-text{margin-bottom:14px;} }
+
+  .hint-output{
+    max-height:0; opacity:0; margin-top:0; overflow:hidden;
+    border-radius:10px; border:1px solid transparent;
+    background:rgba(63,198,240,0.06); font-size:13.5px; line-height:1.55; color:var(--text);
+    transition:max-height .38s cubic-bezier(.2,.8,.2,1), opacity .3s ease, margin-top .38s cubic-bezier(.2,.8,.2,1), border-color .38s ease;
+  }
+  .hint-output.show{ max-height:600px; opacity:1; margin-top:16px; border-color:var(--edge); }
+  .hint-output-inner{ padding:12px 14px; }
+  .hint-output b{color:var(--cyan);}
+  .hint-confirm-desc{ color:var(--text); }
+  .hint-confirm-actions{ display:flex; gap:8px; margin-top:12px; }
+  .btn-hint-use, .btn-hint-cancel{
+    flex:1; padding:10px 12px; border-radius:100px; cursor:pointer;
+    font-family:'Oswald',sans-serif; font-size:12.5px; letter-spacing:.06em; text-transform:uppercase;
+    line-height:1; display:flex; align-items:center; justify-content:center;
+    transition:transform .12s ease, box-shadow .15s ease;
+  }
+  .btn-hint-use{ border:1px solid var(--cyan); background:rgba(63,198,240,0.14); color:#fff; font-weight:600; }
+  .btn-hint-use:hover{ box-shadow:0 0 16px rgba(63,198,240,0.35); }
+  .btn-hint-cancel{ border:1px solid var(--edge); background:none; color:var(--text-dim); }
+  .btn-hint-use:active, .btn-hint-cancel:active{ transform:scale(.96); }
+  @media (max-width:380px){ .btn-hint-use, .btn-hint-cancel{font-size:11px; padding:9px 8px;} }
+  .hint-audience{ display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+  .hint-audience .bar-row{display:flex; align-items:center; gap:8px; font-size:12.5px;}
+  .hint-audience .bar-track{flex:1; height:14px; background:rgba(255,255,255,0.06); border-radius:100px; overflow:hidden;}
+  .hint-audience .bar-fill{height:100%; border-radius:100px; background:linear-gradient(90deg, var(--gold-dim), var(--gold)); transition:width .6s cubic-bezier(.2,.8,.2,1);}
+  .hint-audience .bar-pct{width:38px; text-align:right; color:var(--text-dim);}
+
+  .answers{display:flex; flex-direction:column; gap:10px;}
+  .answer-btn{
+    border:1px solid var(--edge); border-radius:12px; padding:15px 16px; cursor:pointer;
+    background:rgba(255,255,255,0.02);
+    font-family:'Inter',sans-serif; font-size:15px; color:var(--text); font-weight:500; text-align:left;
+    display:flex; gap:12px; align-items:center; line-height:1.35;
+    transition:transform .12s ease, border-color .15s ease, background .15s ease;
+    animation:fadeSlideUp .35s cubic-bezier(.2,.8,.2,1) both;
+    touch-action:manipulation;
+  }
+  .answer-btn .opt-letter{
+    flex:0 0 auto; width:26px; height:26px; border-radius:50%; border:1px solid var(--edge);
+    display:flex; align-items:center; justify-content:center; font-family:'Oswald',sans-serif; font-size:13px; line-height:1; color:var(--text-dim);
+  }
+  @media (max-width:380px){
+    .answer-btn{ padding:12px 12px; font-size:13.5px; gap:9px; }
+    .answer-btn .opt-letter{ width:22px; height:22px; font-size:11.5px; }
+  }
+  .answer-btn:hover:not(:disabled){ border-color:var(--cyan); background:rgba(63,198,240,0.06); }
+  .answer-btn:active:not(:disabled){ transform:scale(.99); }
+  .answer-btn:disabled{cursor:default;}
+  .answer-btn.correct{ border-color:var(--ok); background:rgba(74,222,128,0.12); animation:ringPop .7s ease-out; }
+  .answer-btn.correct .opt-letter{ border-color:var(--ok); color:var(--ok); }
+  .answer-btn.wrong{ border-color:var(--bad); background:rgba(248,113,113,0.12); animation:shake .5s ease, ringPopBad .7s ease-out; }
+  .answer-btn.wrong .opt-letter{ border-color:var(--bad); color:var(--bad); }
+  .answer-btn.dim{ opacity:.4; }
+
+  .explain-box{
+    max-height:0; opacity:0; margin-top:0; overflow:hidden;
+    border-radius:12px; border:1px solid transparent;
+    background:rgba(255,255,255,0.03); font-size:13.5px; line-height:1.6; color:var(--text-dim);
+    transition:max-height .38s cubic-bezier(.2,.8,.2,1), opacity .3s ease, margin-top .38s cubic-bezier(.2,.8,.2,1), border-color .38s ease;
+  }
+  .explain-box.show{ max-height:600px; opacity:1; margin-top:16px; border-color:var(--edge); }
+  .explain-box-inner{ padding:14px 16px; }
+  .explain-box b{color:var(--text);}
+  .explain-box .verdict{ font-family:'Oswald',sans-serif; letter-spacing:.05em; text-transform:uppercase; font-size:12.5px; margin-bottom:6px; display:block; }
+  .verdict.ok-c{color:var(--ok);} .verdict.bad-c{color:var(--bad);}
+
+  .btn-continue{
+    margin-top:14px; width:100%; padding:13px; border:1px solid var(--cyan); border-radius:100px; cursor:pointer;
+    font-family:'Oswald',sans-serif; font-size:13.5px; letter-spacing:.08em; text-transform:uppercase;
+    background:rgba(63,198,240,0.1); color:#fff; font-weight:600; line-height:1;
+    display:none; align-items:center; justify-content:center;
+    transition:transform .12s ease;
+  }
+  .btn-continue:active{transform:scale(.97);}
+
+  .ladder{
+    background:linear-gradient(180deg, var(--panel), var(--panel2));
+    border:1px solid var(--edge); border-radius:18px; padding:12px 10px;
+    display:flex; flex-direction:column-reverse; gap:4px;
+    min-width:0; box-sizing:border-box;
+  }
+  @media (max-width:560px){ .ladder{padding:8px 6px; border-radius:14px; gap:3px;} }
+  @media (max-width:380px){ .ladder{padding:6px 4px; gap:2px; border-radius:12px;} }
+  .rung{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:8px 11px; border-radius:8px; font-family:'Oswald',sans-serif; font-size:12.5px;
+    color:var(--text-dim); border:1px solid transparent;
+    transition:background .3s ease, color .3s ease, transform .25s ease;
+  }
+  @media (max-width:560px){ .rung{padding:6px 7px; font-size:10.5px; gap:4px; border-radius:6px;} }
+  @media (max-width:380px){ .rung{padding:5px 5px; font-size:9.5px; gap:3px;} }
+  .rung .num{ opacity:.55; font-size:11px; width:14px; }
+  .rung .star{color:var(--gold-dim); font-size:10.5px;}
+  .rung .check{color:var(--ok); font-size:12px; font-weight:700; opacity:0; width:14px; text-align:right; transition:opacity .25s ease;}
+  @media (max-width:560px){ .rung .num{width:11px; font-size:9px;} .rung .check{width:11px; font-size:10px;} }
+  @media (max-width:380px){ .rung .num{width:9px; font-size:8px;} .rung .star{font-size:9px;} .rung .check{width:9px; font-size:9px;} }
+  .rung.checkpoint{border-color:var(--edge); color:var(--text);}
+  .rung.current{background:linear-gradient(90deg, var(--gold-dim), var(--gold)); color:#1c1503; font-weight:600; transform:scale(1.02); animation:currentRungPulse 1.8s ease-in-out infinite;}
+  .rung.current .num{color:#1c1503; opacity:.7;}
+  .rung.current .star{color:#1c1503;}
+  .rung.passed{color:var(--gold);}
+  .rung.passed .check{opacity:1;}
+
+  .lifelines{
+    background:linear-gradient(180deg, var(--panel), var(--panel2));
+    border:1px solid var(--edge); border-radius:18px; padding:10px;
+    display:flex; flex-direction:column; gap:6px;
+    min-width:0;
+  }
+  @media (max-width:560px){ .lifelines{padding:8px; gap:5px; border-radius:14px;} }
+  @media (max-width:380px){ .lifelines{padding:7px; gap:4px; border-radius:12px;} }
+  .lifeline-btn{
+    display:flex; flex-direction:row; align-items:center; gap:10px; background:none; border:none; cursor:pointer;
+    color:var(--text-dim); font-family:'Inter',sans-serif; font-size:12.5px; letter-spacing:.02em;
+    width:100%; min-width:0; text-align:left;
+  }
+  .lifeline-btn .lbl{ flex:1 1 auto; min-width:0; overflow-wrap:break-word; white-space:normal; }
+  @media (max-width:560px){ .lifeline-btn{font-size:10.5px; gap:8px;} }
+  @media (max-width:380px){ .lifeline-btn{font-size:9.5px; gap:6px;} }
+  .lifeline-btn .circle{
+    width:36px; height:36px; border-radius:50%; border:1px solid var(--cyan);
+    display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;
+    background:rgba(63,198,240,0.08); transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease, border-color .2s ease, background .2s ease;
+  }
+  @media (max-width:560px){ .lifeline-btn .circle{width:30px; height:30px; font-size:13px;} }
+  @media (max-width:380px){ .lifeline-btn .circle{width:26px; height:26px; font-size:11px;} }
+  .lifeline-btn:active:not(:disabled) .circle{transform:scale(.92);}
+  .lifeline-btn:not(:disabled) .circle:hover{ box-shadow:0 0 16px rgba(63,198,240,0.4); }
+  .lifeline-btn:disabled{ cursor:default; }
+  .lifeline-btn:disabled .circle{ opacity:.28; border-color:var(--edge); background:none; }
+  .lifeline-btn:disabled span.lbl{opacity:.3;}
+
+  /* ---------- RESULT ---------- */
+  #screen-result{ display:none; flex:1; align-items:center; justify-content:center; padding:28px 18px; position:relative; overflow:hidden; }
+  .result-card{
+    max-width:520px; width:100%; text-align:center;
+    background:linear-gradient(180deg, var(--panel), var(--panel2));
+    border:1px solid var(--edge); border-radius:22px; padding:38px 30px 32px;
+    box-shadow:0 0 0 1px rgba(63,198,240,0.06), 0 30px 70px -20px rgba(0,0,0,0.7);
+    position:relative; z-index:2; animation:popIn .5s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @media (max-width:560px){ .result-card{padding:30px 22px 26px; border-radius:18px;} }
+  .result-icon{font-size:44px; margin-bottom:10px;}
+  @keyframes bounceIcon{ 0%,100%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-8px) rotate(-4deg);} }
+  .result-icon.win{animation:bounceIcon 1.6s ease-in-out infinite;}
+  .result-title{font-size:clamp(22px,5vw,28px); font-weight:700; margin-bottom:6px;}
+  .result-sum{font-family:'Oswald',sans-serif; font-size:clamp(30px,6.5vw,40px); color:var(--gold); font-weight:700; margin:12px 0 4px;}
+  .result-note{ font-family:'Oswald',sans-serif; font-size:14px; letter-spacing:.05em; text-transform:uppercase; color:var(--bad); margin-bottom:6px; }
+  .result-desc{color:var(--text-dim); font-size:14px; line-height:1.6; margin-bottom:24px;}
+  .btn-restart{
+    padding:14px 28px; border-radius:100px; border:1px solid var(--cyan); background:rgba(63,198,240,0.1);
+    color:var(--text); font-family:'Oswald',sans-serif; letter-spacing:.08em; text-transform:uppercase;
+    font-size:13px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:transform .12s ease, box-shadow .15s ease;
+  }
+  .btn-restart:hover{ box-shadow:0 0 18px rgba(63,198,240,0.35); }
+  .btn-restart:active{transform:scale(.97);}
+
+  .confetti-piece{ position:absolute; top:0; left:50%; width:8px; height:14px; z-index:1; animation:floatUp 2.6s ease-in forwards; opacity:0; border-radius:2px; }
+
+  /* ---------- ANTI-CHEAT OVERLAY ---------- */
+  #cheat-overlay{
+    position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; padding:20px;
+    background:rgba(4,6,18,0.88); backdrop-filter:blur(6px); animation:fadeIn .25s ease both;
+  }
+  .cheat-card{ max-width:420px; width:100%; text-align:center; background:var(--panel); border:1px solid var(--bad); border-radius:18px; padding:30px 26px; animation:popIn .35s cubic-bezier(.2,.8,.2,1) both; }
+  .cheat-card .icon{font-size:36px; margin-bottom:10px;}
+  .cheat-card h3{color:var(--bad); font-size:19px; margin-bottom:10px;}
+  .cheat-card p{color:var(--text-dim); font-size:14px; line-height:1.6; margin-bottom:20px;}
+  .cheat-card button{ padding:12px 22px; border:none; border-radius:10px; cursor:pointer; background:var(--bad); color:#fff; font-family:'Oswald',sans-serif; letter-spacing:.05em; text-transform:uppercase; font-size:13px; line-height:1; display:inline-flex; align-items:center; justify-content:center; transition:transform .12s ease; }
+  .cheat-card button:active{transform:scale(.96);}
+
+  /* ---------- HINT CONFIRM MODAL ---------- */
+  #hint-overlay{
+    position:fixed; inset:0; z-index:55; display:none; align-items:center; justify-content:center; padding:20px;
+    background:rgba(4,6,18,0.88); backdrop-filter:blur(6px); animation:fadeIn .25s ease both;
+  }
+  .hint-modal-card{
+    max-width:380px; width:100%; text-align:center;
+    background:linear-gradient(180deg, var(--panel), var(--panel2));
+    border:1px solid var(--cyan); border-radius:18px; padding:28px 24px 24px;
+    box-shadow:0 0 0 1px rgba(63,198,240,0.08), 0 30px 70px -20px rgba(0,0,0,0.7);
+    animation:popIn .35s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .hint-modal-card .icon{font-size:34px; margin-bottom:8px;}
+  .hint-modal-card h3{font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.04em; font-size:18px; color:#fff; margin-bottom:12px;}
+  .hint-modal-card p{color:var(--text-dim); font-size:13.5px; line-height:1.6; margin-bottom:20px;}
+  .hint-modal-actions{ display:flex; gap:8px; }
+  .hint-modal-actions .btn-hint-use, .hint-modal-actions .btn-hint-cancel{ flex:1; }
+
+  .footer-note{text-align:center; color:var(--text-dim); font-size:11px; padding:14px; opacity:.6;}
+
+  /* ---------- TASK / INSTRUCTIONS MODAL ---------- */
+  #task-overlay{
+    position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:20px;
+    background:rgba(4,6,18,0.88); backdrop-filter:blur(6px); animation:fadeIn .25s ease both;
+  }
+  .task-card{
+    max-width:420px; width:100%; text-align:center;
+    background:#f0f0f0; border:1px solid #b8b8b8; border-radius:6px;
+    padding:26px 30px 24px; box-shadow:0 12px 34px rgba(0,0,0,0.4);
+    animation:popIn .35s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .task-card h3{color:#1c1f3a; font-family:'Inter',sans-serif; font-weight:700; letter-spacing:0; font-size:19px; margin-bottom:16px;}
+  .task-card p{color:#333844; font-family:'Inter',sans-serif; font-size:14.5px; line-height:1.6; margin-bottom:22px;}
+  .task-card button{
+    padding:9px 26px; border:1px solid #8a8a8a; border-radius:4px; cursor:pointer;
+    background:#e4e4e4; color:#222; font-family:'Inter',sans-serif; letter-spacing:0; text-transform:none;
+    font-size:14px; line-height:1; display:inline-flex; align-items:center; justify-content:center;
+    transition:background .12s ease, transform .12s ease;
+    opacity:0; visibility:hidden;
+  }
+  .task-card button.visible{ opacity:1; visibility:visible; animation:popIn .3s cubic-bezier(.2,.8,.2,1) both; }
+  .task-card button:hover{ background:#d6d6d6; }
+  .task-card button:active{transform:scale(.96);}
+
+  .result-actions{ display:flex; flex-direction:column; gap:10px; }
+  .btn-resume{
+    padding:14px 28px; border-radius:100px; border:1px solid var(--gold); background:rgba(244,196,48,0.12);
+    color:var(--gold); font-family:'Oswald',sans-serif; letter-spacing:.08em; text-transform:uppercase;
+    font-size:13px; line-height:1; cursor:pointer; align-items:center; justify-content:center;
+    transition:transform .12s ease, box-shadow .15s ease;
+  }
+  .btn-resume:hover{ box-shadow:0 0 18px rgba(244,196,48,0.35); }
+  .btn-resume:active{transform:scale(.97);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- TASK / INSTRUCTIONS MODAL (shown before anything else) -->
+<div id="task-overlay">
+  <div class="task-card">
+    <h3>Úloha</h3>
+    <p>Pracujte s pracovním listem. Screen se smajlíkem mi ukážou náhodně vybraní žáci.</p>
+    <button id="btnTaskOk">OK</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- INTRO -->
+  <div id="screen-intro">
+    <div class="intro-wrap">
+      <div class="badge">
+        <svg viewBox="0 0 220 220">
+          <circle cx="110" cy="110" r="96" fill="none" stroke="var(--cyan)" stroke-width="2" opacity="0.6"/>
+          <g class="ring-outer" opacity="0.35">
+            <ellipse cx="110" cy="110" rx="88" ry="30" fill="none" stroke="var(--cyan)" stroke-width="1"/>
+            <ellipse cx="110" cy="110" rx="88" ry="30" fill="none" stroke="var(--cyan)" stroke-width="1" transform="rotate(60 110 110)"/>
+            <ellipse cx="110" cy="110" rx="88" ry="30" fill="none" stroke="var(--cyan)" stroke-width="1" transform="rotate(120 110 110)"/>
+          </g>
+          <g class="ring-inner" fill="var(--gold)">
+            <text x="110" y="46" font-size="26" text-anchor="middle" transform="rotate(0 110 110)">?</text>
+            <text x="110" y="46" font-size="26" text-anchor="middle" transform="rotate(51 110 110)">?</text>
+            <text x="110" y="46" font-size="26" text-anchor="middle" transform="rotate(102 110 110)">?</text>
+            <text x="110" y="46" font-size="26" text-anchor="middle" transform="rotate(153 110 110)">?</text>
+            <text x="110" y="46" font-size="26" text-anchor="middle" transform="rotate(204 110 110)">?</text>
+            <text x="110" y="46" font-size="26" text-anchor="middle" transform="rotate(255 110 110)">?</text>
+            <text x="110" y="46" font-size="26" text-anchor="middle" transform="rotate(306 110 110)">?</text>
+          </g>
+          <circle cx="110" cy="110" r="8" fill="var(--gold)" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="title-main">MILIONÁŘ</div>
+      <div class="title-sub">Levice, nebo pravice?</div>
+      <div class="intro-rules">
+        <b>Jak hra funguje:</b><br>
+        • Špatná odpověď hru ukončí — odneseš si částku z poslední jistoty.<br>
+        • Jistoty jsou u částek <b>1 000 Kč</b> a <b>50 000 Kč</b>.<br>
+        • Máš k dispozici tři nápovědy: Publikum, Telefon příteli a Nápovědu.
+      </div>
+      <button class="btn-start" id="btnStart">Spustit hru</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="screen-game">
+    <div class="topbar">
+      <div class="warn-chip"><span class="warn-dot" id="dot1"></span><span class="warn-dot" id="dot2"></span> anticheat</div>
+    </div>
+    <div class="game-layout">
+      <div class="screen-ladder" id="screenLadder">
+        <div class="ladder-caption" id="ladderCaption"></div>
+        <div class="ladder" id="ladder"></div>
+      </div>
+      <div class="question-view" id="questionView">
+        <div class="question-panel">
+          <div class="q-amount" id="qAmount">100 Kč</div>
+
+          <div class="q-text" id="qText">Načítám otázku…</div>
+
+          <div class="answers">
+            <button class="answer-btn" id="btnLevice" data-side="L"><span class="opt-letter">A</span><span>Levice</span></button>
+            <button class="answer-btn" id="btnPravice" data-side="P"><span class="opt-letter">B</span><span>Pravice</span></button>
+          </div>
+
+          <div class="lifelines-row" id="lifelinesRow"><div class="lifelines-row-inner">
+            <div class="lifelines-btns">
+              <button class="lifeline-btn" id="lifeAudience" aria-label="Nápověda: Publikum"><span class="circle">📊</span></button>
+              <button class="lifeline-btn" id="lifeFriend" aria-label="Nápověda: Přítel"><span class="circle">📞</span></button>
+              <button class="lifeline-btn" id="lifeTip" aria-label="Nápověda: Nápověda"><span class="circle">💡</span></button>
+            </div>
+            <div class="lifelines-note">Každou nápovědu lze v průběhu celé hry použít jen jednou.</div>
+          </div></div>
+
+          <div class="hint-output" id="hintOutput"><div class="hint-output-inner" id="hintOutputInner"></div></div>
+
+          <div class="explain-box" id="explainBox"><div class="explain-box-inner" id="explainBoxInner">
+            <span class="verdict" id="verdictText"></span>
+            <span id="explainText"></span>
+          </div></div>
+          <button class="btn-continue" id="btnContinue">Další otázka</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result">
+    <div class="result-card">
+      <div class="result-icon" id="resultIcon">😊</div>
+      <div class="result-title" id="resultTitle">Skvělá práce!</div>
+      <div class="result-sum" id="resultSum">1 000 000 Kč</div>
+      <div class="result-note" id="resultNote" style="display:none;"></div>
+      <div class="result-desc" id="resultDesc"></div>
+      <div class="result-actions">
+        <button class="btn-resume" id="btnResume" style="display:none;">Pokračovat od jistoty</button>
+        <button class="btn-restart" id="btnRestart">Hrát od začátku</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Milionář — Levice/pravice · vzdělávací hra pro výuku občanské nauky</div>
+</div>
+
+<!-- ANTI-CHEAT OVERLAY -->
+<div id="cheat-overlay">
+  <div class="cheat-card">
+    <div class="icon">⚠️</div>
+    <h3 id="cheatTitle">Detekováno přepnutí okna</h3>
+    <p id="cheatText">Opustil jsi hrací okno nebo záložku. To je považováno za podvádění a je zaznamenáno.</p>
+    <button id="btnCheatContinue">Pokračovat ve hře</button>
+  </div>
+</div>
+
+<!-- HINT CONFIRM MODAL -->
+<div id="hint-overlay">
+  <div class="hint-modal-card">
+    <div class="icon" id="hintModalIcon">💡</div>
+    <h3 id="hintModalTitle">Nápověda</h3>
+    <p id="hintModalDesc"></p>
+    <div class="hint-modal-actions">
+      <button class="btn-hint-use" id="btnHintUse">Využít nápovědu</button>
+      <button class="btn-hint-cancel" id="btnHintCancel">Zpět</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  const amounts = [100, 500, 1000, 5000, 50000, 250000, 1000000];
+  const checkpointTiers = [2, 4]; // index into amounts: 1 000 Kč a 50 000 Kč
+
+  const questions = [
+    { tier:0, side:'L', text:'Město má finančně podporovat sociálně slabé občany, aby se nepropadli do chudoby.',
+      explain:'Aktivní přerozdělování prostředků ve prospěch chudších občanů a snižování sociální nerovnosti je typický nástroj sociálního státu.',
+      hint:'Zaměř se na klíčová slova: přerozdělování a sociální stát.' },
+    { tier:0, side:'P', text:'Veřejné vysoké školy nebudou zdarma a každý si je bude muset začít platit.',
+      explain:'Omezení bezplatných veřejných služeb a přenesení nákladů na jednotlivce odpovídá důrazu na osobní odpovědnost a menší roli státu.',
+      hint:'Kdo tu nese náklady — stát, nebo jednotlivec sám za sebe?' },
+    { tier:0, side:'L', text:'Stát má regulovat výši nájemného, aby si bydlení mohli dovolit i lidé s nižšími příjmy.',
+      explain:'Regulace cen ve prospěch slabší strany trhu je typický zásah sociálního státu do tržního mechanismu.',
+      hint:'Kdo určuje cenu — trh, nebo stát kvůli ochraně slabších?' },
+
+    { tier:1, side:'L', text:'Zvýšíme daně nejbohatším podnikatelům. Z těchto peněz postavíme nové byty pro chudé občany.',
+      explain:'Zdanění bohatších a přerozdělení výnosu ve prospěch chudších je klasický nástroj snižování nerovnosti.',
+      hint:'Peníze jdou od bohatších k chudším — komu opatření pomáhá nejvíc?' },
+    { tier:1, side:'P', text:'Snížíme sociální dávky a za ušetřené peníze postavíme obchodní centrum, kde budou nové firmy.',
+      explain:'Omezení sociálních výdajů ve prospěch podpory podnikání a tržního prostředí je typicky pravicové opatření.',
+      hint:'Sociální výdaje klesají, podpora podnikání roste.' },
+    { tier:1, side:'P', text:'Snížíme sociální dávky, aby se lidem více chtělo pracovat a méně využívat stát.',
+      explain:'Omezení sociálních výdajů ve prospěch osobní odpovědnosti a motivace pracovat je typicky pravicové opatření.',
+      hint:'Nižší dávky, větší tlak na vlastní zodpovědnost.' },
+
+    { tier:2, side:'P', text:'Občanům snížíme daně a tyto peníze vložíme do výstavby nové dálnice pro zlepšení dopravy podniků.',
+      explain:'Nižší daně a investice do infrastruktury pro podnikatele odpovídají důrazu na podporu byznysu a nižší daňovou zátěž.',
+      hint:'Nižší daně a podpora byznysu bývají spojeny s jedním konkrétním směrem.' },
+    { tier:2, side:'L', text:'Financujeme z peněz státu rekonstrukci sociálních bytů pro rodiny s nízkými příjmy, aby nemusely nic platit.',
+      explain:'Financování bydlení pro nízkopříjmové rodiny ze státních peněz je typický nástroj sociálního státu.',
+      hint:'Stát platí za bydlení lidem s nízkými příjmy — typický znak sociálního státu.' },
+    { tier:2, side:'L', text:'Zavedeme progresivní daň z příjmu, aby bohatší lidé odváděli vyšší procento ze svého výdělku než chudší.',
+      explain:'Progresivní zdanění podle výše příjmu je nástroj přerozdělování typický pro sociální stát.',
+      hint:'Čím vyšší příjem, tím vyšší procento daně — komu to má pomoct?' },
+
+    { tier:3, side:'P', text:'Zrušíme dotace pro neziskové organizace a peníze investujeme do rozvoje technologického parku pro firmy, kde mohou rozvíjet svůj business.',
+      explain:'Přesun peněz od dotací k podpoře podnikání odpovídá důrazu na tržní řešení místo státních dotací.',
+      hint:'Dotace mizí, podpora firem roste — kam se kloní váha opatření?' },
+    { tier:3, side:'P', text:'Omezíme sociální dávky, aby lidé více pracovali a méně záviseli na pomoci státu.',
+      explain:'Argument, že nižší dávky motivují lidi k práci a snižují závislost na státu, je typicky pravicový.',
+      hint:'Menší závislost na státu a důraz na vlastní práci.' },
+    { tier:3, side:'L', text:'Zvýšíme daně velkým korporacím a za tyto peníze postavíme nové školky zdarma pro všechny rodiny.',
+      explain:'Vyšší zdanění velkých firem ve prospěch bezplatné veřejné služby pro rodiny je levicové opatření.',
+      hint:'Peníze jdou od velkých firem k bezplatné službě pro rodiny.' },
+
+    { tier:4, side:'L', text:'Místo renovace OC Nová Karolina peníze raději použijeme na dotace na školní obědy pro chudé děti.',
+      explain:'Přesun peněz od komerčního projektu k přímé sociální pomoci dětem je levicové opatření.',
+      hint:'Peníze míří od komerčního projektu k přímé pomoci dětem.' },
+    { tier:4, side:'L', text:'Z peněz původně určených na opravy dálnic zvýšíme platy zdravotním sestrám, učitelům a hasičům. Podnikatelé si na podporu počkají.',
+      explain:'Upřednostnění platů ve veřejném sektoru před infrastrukturou pro podnikatele odpovídá důrazu na veřejné služby.',
+      hint:'Platy ve veřejných službách jsou upřednostněny před infrastrukturou pro firmy.' },
+    { tier:4, side:'P', text:'Zrušíme příspěvek na bydlení pro nízkopříjmové rodiny a ušetřené peníze použijeme na daňové úlevy pro firmy, které vytvoří nová pracovní místa.',
+      explain:'Přesun peněz od sociální dávky k daňovým úlevám pro zaměstnavatele odpovídá důrazu na podporu podnikání místo sociální pomoci.',
+      hint:'Dávka pro rodiny mizí, úleva pro firmy, které tvoří pracovní místa, přibývá.' },
+
+    { tier:5, side:'L', text:'Zvýšíme minimální mzdu, aby si i ti nejhůře placení mohli lépe žít.',
+      explain:'Zvyšování minimální mzdy na ochranu nízkopříjmových pracujících je nástroj sociální politiky.',
+      hint:'Opatření chrání nejhůře placené pracující.' },
+    { tier:5, side:'P', text:'Lidé budou chodit do důchodu až v 70 letech, abychom ušetřili peníze za důchodce. Tyto peníze pak vložíme na podporu startupů.',
+      explain:'Úspory na sociálních výdajích přesměrované do podpory podnikání odpovídají pravicovému přístupu.',
+      hint:'Úspora na sociálních výdajích jde na podporu podnikání.' },
+    { tier:5, side:'L', text:'Stát bude dotovat léky pro finančně ohrožené důchodce, aby si je mohli dovolit i s nízkým důchodem.',
+      explain:'Dotace na základní potřeby (léky) pro ohroženou skupinu obyvatel financovaná státem je typický nástroj sociální politiky.',
+      hint:'Stát platí za to, co by si jinak ohrožení lidé nemohli dovolit.' },
+
+    { tier:6, side:'P', text:'Snížíme daň z příjmu pro firmy, aby mohly více investovat do svého rozvoje.',
+      explain:'Snížení firemních daní na podporu investic je klasické pravicové opatření.',
+      hint:'Nižší daně pro firmy na podporu jejich investic.' },
+    { tier:6, side:'P', text:'Snížíme sociální dávky chudým občanům. Za tyto ušetřené peníze opravíme dálnice, což usnadní podnikatelům přepravu zboží.',
+      explain:'Omezení sociálních dávek ve prospěch infrastruktury pro podnikatele je pravicové opatření.',
+      hint:'Dávky klesají, infrastruktura pro podnikatele roste.' },
+    { tier:6, side:'L', text:'Zavedeme vyšší daň z majetku pro nejbohatší jednotlivce a výnos použijeme na zcela bezplatné zdravotnictví pro všechny občany.',
+      explain:'Vyšší zdanění majetku nejbohatších ve prospěch všeobecně dostupné veřejné služby je typický nástroj přerozdělování.',
+      hint:'Daň platí nejbohatší, prospěch má celá společnost.' },
+  ];
+
+  const fmt = n => n.toLocaleString('cs-CZ').replace(/,/g,' ') + ' Kč';
+
+  let state = { qIndex:0, cheatCount:0, gameOver:false, locked:false, hints:{audience:false, friend:false, tip:false} };
+
+  const el = id => document.getElementById(id);
+  const screenIntro = el('screen-intro'), screenGame = el('screen-game'), screenResult = el('screen-result');
+  const screenLadder = el('screenLadder'), questionView = el('questionView');
+
+  // How long the ladder screen stays visible before the question box appears.
+  const LADDER_PAUSE_FIRST = 5400; // first time, at game start — lets the pulse animation run 3x (1.8s each)
+  const LADDER_PAUSE_TIER  = 6400; // after finishing a tier (with the blink) — pulse 3x plus buffer for the tier caption
+
+  // Shows the standalone ladder screen, optionally blinking the newly-reached
+  // rung, then automatically reveals the question box after `pause` ms.
+  function showLadderScreen(pause, newTierIndex){
+    questionView.classList.remove('show');
+    renderLadder();
+    const caption = el('ladderCaption');
+    document.querySelectorAll('.rung.justReached').forEach(r => r.classList.remove('justReached'));
+    if (newTierIndex !== undefined && newTierIndex !== null){
+      caption.textContent = 'Postoupil jsi na ' + fmt(amounts[newTierIndex]);
+      caption.classList.add('new-tier');
+      const rung = el('rung-' + newTierIndex);
+      if (rung) rung.classList.add('justReached');
+    } else {
+      caption.textContent = '';
+      caption.classList.remove('new-tier');
+    }
+    screenLadder.classList.add('show');
+    setTimeout(showQuestionScreen, pause);
+  }
+
+  function showQuestionScreen(){
+    screenLadder.classList.remove('show');
+    questionView.classList.add('show');
+  }
+
+  function buildLadder(){
+    const wrap = el('ladder');
+    wrap.innerHTML = '';
+    amounts.forEach((amt, i) => {
+      const div = document.createElement('div');
+      div.className = 'rung';
+      div.id = 'rung-' + i;
+      const isCheckpoint = checkpointTiers.includes(i);
+      if (isCheckpoint) div.classList.add('checkpoint');
+      div.innerHTML = '<span class="num">' + (i+1) + '</span><span style="flex:1;">' + fmt(amt) + '</span>' + (isCheckpoint ? '<span class="star">★</span>' : '') + '<span class="check">✓</span>';
+      wrap.appendChild(div);
+    });
+  }
+
+  function currentTier(){ return questions[state.qIndex].tier; }
+
+  // First question index belonging to a given tier (works regardless of how
+  // many questions each tier has).
+  function firstIndexOfTier(tier){
+    return questions.findIndex(q => q.tier === tier);
+  }
+
+  function safeAmount(){
+    let safe = 0;
+    for (const cp of checkpointTiers){
+      // Reaching a checkpoint tier (i.e. having cleared everything before it)
+      // already banks that amount, even if the checkpoint question itself is missed.
+      if (state.qIndex >= firstIndexOfTier(cp)) safe = amounts[cp];
+    }
+    return safe;
+  }
+
+  // Index of the first question of the last checkpoint (jistota) tier the
+  // player had reached when the game ended. Mirrors the logic in safeAmount()
+  // so the "Pokračovat od X Kč" button actually resumes from the same place
+  // the banked amount X was earned — not from the tier the player just failed
+  // in (which could be several tiers past the last real checkpoint).
+  // Returns 0 if no checkpoint was reached yet (full restart is the only option there).
+  function resumeIndexFor(qIndexAtEnd){
+    let idx = 0;
+    for (const cp of checkpointTiers){
+      if (qIndexAtEnd >= firstIndexOfTier(cp)) idx = firstIndexOfTier(cp);
+    }
+    return idx;
+  }
+
+  function renderLadder(){
+    amounts.forEach((amt,i)=>{
+      const r = el('rung-'+i);
+      r.classList.remove('current','passed');
+      if (i < currentTier()) r.classList.add('passed');
+      if (i === currentTier()) r.classList.add('current');
+    });
+  }
+
+  function resetLifelineButtons(){
+    el('lifeAudience').disabled = state.hints.audience;
+    el('lifeFriend').disabled = state.hints.friend;
+    el('lifeTip').disabled = state.hints.tip;
+  }
+
+  function renderQuestion(){
+    const q = questions[state.qIndex];
+    const amtEl = el('qAmount');
+    amtEl.textContent = fmt(amounts[q.tier]);
+
+    const textEl = el('qText');
+    textEl.style.animation = 'none';
+    void textEl.offsetWidth;
+    textEl.style.animation = '';
+    textEl.textContent = q.text;
+
+    renderLadder();
+    resetLifelineButtons();
+
+    const bL = el('btnLevice'), bP = el('btnPravice');
+    [bL,bP].forEach(b=>{
+      b.disabled=false; b.classList.remove('correct','wrong','dim');
+    });
+    el('explainBox').classList.remove('show');
+    el('btnContinue').style.display = 'none';
+    el('hintOutput').classList.remove('show');
+    el('hintOutputInner').innerHTML = '';
+    el('lifelinesRow').classList.remove('hide');
+  }
+
+  // Sjednocená funkce pro rozbalení boxu (hint-output i explain-box) a jemné
+  // doscrollování do view. Cíl scrollu se počítá hned na základě skutečné
+  // (finální) výšky obsahu — ne až po doběhnutí přechodu — takže box i stránka
+  // se vždy hýbou současně, jedním plynulým pohybem, ať už je obsah krátký,
+  // nebo dlouhý. Díky tomu je chování konzistentní a nepůsobí to trhaně.
+  function expandAndScroll(box, inner){
+    requestAnimationFrame(() => {
+      const finalHeight = inner.scrollHeight;
+      const rect = box.getBoundingClientRect();
+      const finalBottom = rect.top + finalHeight;
+      if (finalBottom > window.innerHeight){
+        const desired = window.scrollY + finalBottom - window.innerHeight + 16;
+        window.scrollTo({ top: Math.max(0, desired), behavior: 'smooth' });
+      }
+    });
+  }
+
+  function showHint(html){
+    const box = el('hintOutput');
+    const inner = el('hintOutputInner');
+    inner.innerHTML = html;
+    // vynutit reflow, aby se přechod spustil vždy znovu i po rychlém přeskočení otázky
+    void box.offsetWidth;
+    box.classList.add('show');
+    expandAndScroll(box, inner);
+  }
+
+  const hintInfo = {
+    audience: { icon:'📊', label:'Publikum', desc:'Publikum v sále zahlasuje o otázce a uvidíš, kolik procent hlasovalo pro Levici a kolik pro Pravici.' },
+    friend:   { icon:'📞', label:'Přítel', desc:'Zavoláš kamarádovi — řekne ti svůj tip a krátce ho zdůvodní.' },
+    tip:      { icon:'💡', label:'Nápověda', desc:'Zobrazí se textová nápověda, která tě navede správným směrem, ale odpověď rovnou neprozradí.' }
+  };
+
+  function showHintConfirm(key){
+    if (state.hints[key] || state.locked) return;
+    const info = hintInfo[key];
+    el('hintModalIcon').textContent = info.icon;
+    el('hintModalTitle').textContent = info.label;
+    el('hintModalDesc').textContent = info.desc;
+    el('hint-overlay').style.display = 'flex';
+    el('btnHintUse').onclick = () => {
+      el('hint-overlay').style.display = 'none';
+      state.hints[key] = true;
+      resetLifelineButtons();
+      revealHint(key);
+    };
+    el('btnHintCancel').onclick = () => {
+      el('hint-overlay').style.display = 'none';
+    };
+  }
+
+  function revealHint(key){
+    const q = questions[state.qIndex];
+    if (key === 'audience'){
+      const correctPct = 58 + Math.floor(Math.random()*25); // 58-82%
+      const wrongPct = 100 - correctPct;
+      const lPct = q.side === 'L' ? correctPct : wrongPct;
+      const pPct = 100 - lPct;
+      showHint(
+        '<b>📊 Publikum hlasovalo:</b>' +
+        '<div class="hint-audience">' +
+          '<div class="bar-row"><span style="width:52px;">Levice</span><div class="bar-track"><div class="bar-fill" style="width:'+lPct+'%;"></div></div><span class="bar-pct">'+lPct+'%</span></div>' +
+          '<div class="bar-row"><span style="width:52px;">Pravice</span><div class="bar-track"><div class="bar-fill" style="width:'+pPct+'%;"></div></div><span class="bar-pct">'+pPct+'%</span></div>' +
+        '</div>'
+      );
+    } else if (key === 'friend'){
+      const sideName = q.side === 'L' ? 'levicové' : 'pravicové';
+      showHint('<b>📞 Kamarád ti volá zpět:</b> „Podle mě je tohle jasně ' + sideName + ' opatření — ' + q.explain.charAt(0).toLowerCase() + q.explain.slice(1) + '"');
+    } else if (key === 'tip'){
+      showHint('<b>💡 Nápověda:</b> ' + q.hint);
+    }
+  }
+
+  el('lifeAudience').addEventListener('click', () => showHintConfirm('audience'));
+  el('lifeFriend').addEventListener('click', () => showHintConfirm('friend'));
+  el('lifeTip').addEventListener('click', () => showHintConfirm('tip'));
+
+
+  function answer(side){
+    if (state.locked) return;
+    state.locked = true;
+    const q = questions[state.qIndex];
+    const correct = side === q.side;
+    const bL = el('btnLevice'), bP = el('btnPravice');
+    const chosenBtn = side === 'L' ? bL : bP;
+    const correctBtn = q.side === 'L' ? bL : bP;
+    bL.disabled = true; bP.disabled = true;
+
+    if (correct){
+      chosenBtn.classList.add('correct');
+    } else {
+      chosenBtn.classList.add('wrong');
+      correctBtn.classList.add('correct');
+      [bL,bP].filter(b=>b!==chosenBtn && b!==correctBtn).forEach(b=>b.classList.add('dim'));
+    }
+
+    el('lifelinesRow').classList.add('hide');
+
+    const box = el('explainBox');
+    const verdict = el('verdictText');
+    verdict.textContent = correct ? 'Správně — ' + (q.side==='L'?'LEVICE':'PRAVICE') : 'Špatně — správně je ' + (q.side==='L'?'LEVICE':'PRAVICE');
+    verdict.className = 'verdict ' + (correct ? 'ok-c':'bad-c');
+    el('explainText').textContent = q.explain;
+
+    const cont = el('btnContinue');
+    cont.textContent = correct ? (state.qIndex === questions.length-1 ? 'Vyzvednout výhru' : 'Další otázka') : 'Ukončit hru';
+    cont.onclick = () => {
+      if (!correct){ finishGame(false); return; }
+      if (state.qIndex === questions.length-1){ finishGame(true); return; }
+      const nextIndex = state.qIndex + 1;
+      const nextTier = questions[nextIndex].tier;
+      const isNewTier = nextTier !== q.tier;
+      state.qIndex = nextIndex;
+      state.locked = false;
+      renderQuestion();
+      if (isNewTier){
+        // Both questions of the previous tier are done: show the ladder,
+        // blink the newly-reached rung, then go straight to the next question.
+        showLadderScreen(LADDER_PAUSE_TIER, nextTier);
+      } else {
+        // Still within the same tier (second of the two questions): stay on
+        // the question box, no ladder screen in between.
+        showQuestionScreen();
+      }
+    };
+
+    // Zobrazení boxu s výsledkem. Případný otevřený box s nápovědou se zavírá
+    // souběžně (ne až po jeho doběhnutí) a cíl scrollu se počítá hned podle
+    // skutečné výšky obsahu vysvětlení — box i stránka se tak vždy pohnou
+    // najednou, jedním plynulým krokem, ať je otázka/vysvětlení jakkoli
+    // dlouhé nebo krátké. To zajišťuje konzistentní, neroztřesené chování.
+    const inner = el('explainBoxInner');
+    cont.style.display = 'flex';
+    void box.offsetWidth;
+    box.classList.add('show');
+    expandAndScroll(box, inner);
+    el('hintOutput').classList.remove('show');
+  }
+
+  function spawnConfetti(){
+    const colors = ['#f4c430','#3fc6f0','#4ade80','#eef1ff'];
+    const wrap = screenResult;
+    for (let i=0;i<26;i++){
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.background = colors[i % colors.length];
+      p.style.left = (50 + (Math.random()*70-35)) + '%';
+      p.style.setProperty('--rot', (Math.random()*360-180) + 'deg');
+      p.style.animationDelay = (Math.random()*0.5) + 's';
+      p.style.animationDuration = (2.2 + Math.random()*1.2) + 's';
+      wrap.appendChild(p);
+      setTimeout(()=>p.remove(), 3800);
+    }
+  }
+
+  function updateResumeButton(qIndexAtEnd){
+    const resumeIdx = resumeIndexFor(qIndexAtEnd);
+    const btn = el('btnResume');
+    const amt = safeAmount(); // state.qIndex still equals qIndexAtEnd at this point
+    // Only offer "resume" once an actual jistota (checkpoint) has been reached.
+    // Otherwise resumeIdx could be > 0 (e.g. failing in tier 1) while amt is
+    // still 0, which produced a nonsensical "Pokračovat od 0 Kč" button.
+    if (resumeIdx > 0 && amt > 0){
+      state.resumeIndex = resumeIdx;
+      btn.textContent = 'Pokračovat od ' + fmt(amt);
+      btn.style.display = 'flex';
+    } else {
+      state.resumeIndex = 0;
+      btn.style.display = 'none';
+    }
+  }
+
+  function finishGame(won){
+    screenGame.style.display = 'none';
+    screenResult.style.display = 'flex';
+    const icon = el('resultIcon');
+    icon.classList.remove('win');
+    const note = el('resultNote');
+    note.style.display = 'none';
+    if (won){
+      icon.textContent = '😊';
+      icon.classList.add('win');
+      el('resultTitle').textContent = 'Skvělá práce!';
+      el('resultSum').textContent = fmt(1000000);
+      el('resultDesc').textContent = 'Skvěle, tento screen si nech otevřený (ať neriskuješ pětku).';
+      spawnConfetti();
+      el('btnResume').style.display = 'none';
+      state.resumeIndex = 0;
+    } else {
+      const won_amt = safeAmount();
+      icon.textContent = '💭';
+      el('resultTitle').textContent = 'Konec hry';
+      el('resultSum').textContent = fmt(won_amt);
+      note.style.display = 'block';
+      note.textContent = 'To je málo! Zkus to znovu.';
+      el('resultDesc').textContent = (won_amt > 0
+        ? 'Odpověď byla chybná, ale díky dosažené jistotě si odnášíš tuto částku.'
+        : 'Odpověď byla chybná dříve, než jsi dosáhl/a první jistoty (1 000 Kč).')
+        + ' Pro splnění úlohy musíš hru dohrát celou až do konce (na 1 000 000 Kč) — pokud uděláš chybu, hru si zopakuj znovu od začátku nebo od poslední jistoty.';
+      updateResumeButton(state.qIndex);
+    }
+  }
+
+  function disqualify(){
+    screenGame.style.display = 'none';
+    screenResult.style.display = 'flex';
+    el('resultIcon').classList.remove('win');
+    el('resultIcon').textContent = '🚫';
+    el('resultTitle').textContent = 'Hra ukončena';
+    el('resultSum').textContent = fmt(0);
+    el('resultNote').style.display = 'block';
+    el('resultNote').textContent = 'To je málo! Zkus to znovu.';
+    el('resultDesc').textContent = 'Hra byla ukončena kvůli opakovanému přepnutí okna nebo záložky během hry. Pro splnění úlohy musíš hru dohrát celou až do konce (na 1 000 000 Kč) bez přepínání oken.';
+    updateResumeButton(state.qIndex);
+  }
+
+  // --- anti-cheat: window/tab switching ---
+  let overlayShown = false;
+  function triggerCheatWarning(){
+    if (state.gameOver) return;
+    if (screenGame.style.display !== 'flex') return;
+    if (overlayShown) return;
+    state.cheatCount++;
+    el('dot1').classList.toggle('active', state.cheatCount>=1);
+    el('dot2').classList.toggle('active', state.cheatCount>=2);
+
+    if (state.cheatCount >= 2){
+      state.gameOver = true;
+      overlayShown = true;
+      el('cheatTitle').textContent = 'Hra byla ukončena';
+      el('cheatText').textContent = 'Opakovaně jsi opustil/a hrací okno. Hra se z důvodu podezření na podvádění ukončuje.';
+      el('btnCheatContinue').textContent = 'Zobrazit výsledek';
+      el('btnCheatContinue').onclick = () => {
+        el('cheat-overlay').style.display = 'none';
+        overlayShown = false;
+        disqualify();
+      };
+      el('cheat-overlay').style.display = 'flex';
+    } else {
+      overlayShown = true;
+      el('cheatTitle').textContent = 'Detekováno přepnutí okna';
+      el('cheatText').textContent = 'Opustil/a jsi hrací okno nebo záložku. Toto je varování 1 z 2 — při dalším přepnutí bude hra ukončena.';
+      el('btnCheatContinue').textContent = 'Pokračovat ve hře';
+      el('btnCheatContinue').onclick = () => {
+        el('cheat-overlay').style.display = 'none';
+        overlayShown = false;
+      };
+      el('cheat-overlay').style.display = 'flex';
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => { if (document.hidden) triggerCheatWarning(); });
+  window.addEventListener('blur', () => { triggerCheatWarning(); });
+
+  // --- start / restart ---
+  el('btnStart').addEventListener('click', () => {
+    state = { qIndex:0, cheatCount:0, gameOver:false, locked:false, hints:{audience:false, friend:false, tip:false} };
+    el('dot1').classList.remove('active'); el('dot2').classList.remove('active');
+    buildLadder();
+    screenIntro.style.display = 'none';
+    screenResult.style.display = 'none';
+    screenGame.style.display = 'flex';
+    renderQuestion();
+    showLadderScreen(LADDER_PAUSE_FIRST);
+  });
+
+  el('btnLevice').addEventListener('click', () => answer('L'));
+  el('btnPravice').addEventListener('click', () => answer('P'));
+
+  el('btnRestart').addEventListener('click', () => {
+    screenResult.style.display = 'none';
+    screenIntro.style.display = 'flex';
+  });
+
+  el('btnResume').addEventListener('click', () => {
+    const resumeIdx = state.resumeIndex || 0;
+    state = { qIndex: resumeIdx, cheatCount:0, gameOver:false, locked:false, hints:{audience:false, friend:false, tip:false}, resumeIndex:0 };
+    el('dot1').classList.remove('active'); el('dot2').classList.remove('active');
+    buildLadder();
+    screenResult.style.display = 'none';
+    screenIntro.style.display = 'none';
+    screenGame.style.display = 'flex';
+    renderQuestion();
+    showLadderScreen(LADDER_PAUSE_FIRST);
+  });
+
+  // --- initial task/instructions modal ---
+  setTimeout(() => { el('btnTaskOk').classList.add('visible'); }, 5000);
+  el('btnTaskOk').addEventListener('click', () => {
+    el('task-overlay').style.display = 'none';
+  });
+
+})();
+</script>
+</body>
+</html>
